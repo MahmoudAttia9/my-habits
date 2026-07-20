@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Master Pro | Premium Dark</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#09090b', // True dark background
+                            900: '#18181b', // Card background
+                            800: '#27272a', // Borders and subtle fills
+                            700: '#3f3f46', // Stronger borders
+                            400: '#a1a1aa', // Muted text
+                            300: '#d4d4d8', // Normal text
+                            100: '#f4f4f5', // Headings
+                        },
+                        accent: {
+                            glow: 'rgba(99, 102, 241, 0.5)',
+                            primary: '#6366f1', // Indigo
+                            secondary: '#22d3ee', // Cyan
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 40px -15px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+                        'glow': '0 0 20px rgba(99, 102, 241, 0.2)',
+                        'glow-strong': '0 0 30px rgba(99, 102, 241, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #09090b;
+            color: #d4d4d8;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(34, 211, 238, 0.03) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+        
+        .dashboard-panel {
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #a5b4fc, #67e8f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Highly Polished Checkbox */
+        .habit-check {
+            appearance: none;
+            width: 1.35rem;
+            height: 1.35rem;
+            background-color: #18181b;
+            border: 1px solid #3f3f46;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .habit-check:hover {
+            border-color: #6366f1;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+            transform: scale(1.05);
+        }
+
+        .habit-check:checked {
+            background: linear-gradient(135deg, #6366f1, #22d3ee);
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+            transform: scale(1.1);
+        }
+
+        .habit-check:checked::after {
+            content: '';
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-bottom: 2px;
+            box-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+        }
+
+        /* Input fields */
+        input[type="text"], input[type="number"], select, textarea {
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            color: #f4f4f5;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Fix Select Option Background Issue */
+        select option {
+            background-color: #18181b;
+            color: #f4f4f5;
+            font-weight: 500;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #09090b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; border: 2px solid #09090b; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        /* Tables */
+        table { border-collapse: separate; border-spacing: 0; }
+        th, td { border-bottom: 1px solid #18181b; border-right: 1px solid #18181b; }
+        th:last-child, td:last-child { border-right: none; }
+        
+        .number-font { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        
+        .progress-bar-gradient {
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+            box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 min-h-screen">
+
+    <!-- Main Container -->
+    <div class="max-w-[1800px] mx-auto space-y-6">
+        
+        <!-- Top Row: Settings & Overview Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Branding & Setup -->
+            <div class="lg:col-span-3 dashboard-panel p-6 flex flex-col justify-between">
+                <div>
+                    <h1 class="text-2xl font-black gradient-text mb-1 tracking-tight">Habit Master</h1>
+                    <p class="text-[10px] text-dark-400 mb-6 uppercase tracking-[0.2em] border-b border-dark-800 pb-4 font-semibold">Premium Analytics</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-dark-900/50 p-3 rounded-xl border border-dark-800 hover:border-dark-700 transition-colors">
+                        <span class="text-xs font-semibold text-dark-300">Year</span>
+                        <select id="year-select" class="text-sm px-2 py-1 bg-transparent rounded cursor-pointer font-bold number-font text-white" onchange="handleDateChange()"></select>
+                    </div>
+                    <div class="flex justify-between items-center bg-dark-900/50 p-3 rounded-xl border border-dark-800 hover:border-dark-700 transition-colors">
+                        <span class="text-xs font-semibold text-dark-300">Month</span>
+                        <select id="month-select" class="text-sm px-2 py-1 bg-transparent rounded cursor-pointer font-bold text-white" onchange="handleDateChange()">
+                            <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                            <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                            <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                            <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="pt-5 border-t border-dark-800">
+                        <button onclick="openAddHabitModal()" class="w-full bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-glow-strong hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                            Add New Habit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Habits -->
+            <div class="lg:col-span-4 dashboard-panel p-6 flex flex-col">
+                <h2 class="text-[11px] uppercase tracking-[0.15em] text-dark-300 font-bold mb-4 flex items-center gap-2">
+                    <span class="text-accent-primary text-sm">★</span> Top Habits
+                </h2>
+                <div id="top-habits-list" class="flex-grow flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-2 h-[200px]">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Main Statistics -->
+            <div class="lg:col-span-5 dashboard-panel p-6 flex flex-col relative overflow-hidden">
+                <!-- Background Ambient Glow -->
+                <div class="absolute -top-32 -right-32 w-96 h-96 bg-accent-primary opacity-5 blur-[120px] pointer-events-none"></div>
+                
+                <h2 class="text-[11px] uppercase tracking-[0.15em] text-dark-300 font-bold mb-6 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-accent-secondary shadow-glow"></div>
+                    Monthly Overview
+                </h2>
+                
+                <div class="flex-grow flex gap-6 h-full items-center">
+                    <!-- Progress Ring (Donut) -->
+                    <div class="w-1/3 flex flex-col items-center justify-center border-r border-dark-800 pr-6">
+                        <div class="relative w-32 h-32 drop-shadow-2xl">
+                            <canvas id="overallDonutChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center mt-1">
+                                <span id="overall-percentage" class="number-font font-black text-3xl text-white tracking-tighter">0%</span>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-center w-full bg-dark-900/50 p-2 rounded-lg border border-dark-800">
+                            <div class="text-[9px] text-dark-400 uppercase tracking-widest mb-1 font-semibold">Total Checks</div>
+                            <div class="text-xs font-bold text-dark-100 number-font" id="overall-fraction">0 / 0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bar Chart -->
+                    <div class="w-2/3 h-full relative flex flex-col">
+                        <div class="flex-grow relative w-full h-[140px]">
+                            <canvas id="monthlyBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Grid View -->
+        <div class="dashboard-panel p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-dark-900 rounded-xl border border-dark-800 shadow-inner">
+                        <svg class="w-5 h-5 text-accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white tracking-tight" id="current-week-label">Current Week</h2>
+                        <p class="text-[10px] text-dark-400 uppercase tracking-widest mt-0.5 font-medium">Saturday to Friday</p>
+                    </div>
+                </div>
+                <div class="flex bg-dark-900 p-1 rounded-xl border border-dark-800 shadow-inner">
+                    <button onclick="prevWeek()" class="px-5 py-2 hover:bg-dark-800 rounded-lg text-xs font-bold text-dark-300 hover:text-white transition-all focus:outline-none">◀ Prev</button>
+                    <div class="w-px bg-dark-700 mx-1 my-1.5"></div>
+                    <button onclick="nextWeek()" class="px-5 py-2 hover:bg-dark-800 rounded-lg text-xs font-bold text-dark-300 hover:text-white transition-all focus:outline-none">Next ▶</button>
+                </div>
+            </div>
+            
+            <!-- 7-Day Grid -->
+            <div id="weekly-grid" class="grid grid-cols-7 gap-4">
+                <!-- Columns injected via JS -->
+            </div>
+        </div>
+
+        <!-- Monthly Detailed Table -->
+        <div class="dashboard-panel overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-dark-800 bg-dark-900/30 flex justify-between items-center">
+                <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-dark-100 flex items-center gap-2">
+                    <span class="text-accent-primary">❖</span> Comprehensive Log
+                </h2>
+                <div class="flex gap-4 items-center">
+                    <span class="text-[10px] font-bold text-dark-300 bg-dark-900 px-3 py-1.5 rounded-lg border border-dark-800 shadow-inner" id="month-days-count">30 Days</span>
+                    <button onclick="clearCurrentMonth()" class="text-[10px] text-red-400 hover:text-red-300 transition-colors font-bold uppercase tracking-widest bg-red-400/10 hover:bg-red-400/20 px-3 py-1.5 rounded-lg">Clear Data</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar flex-grow">
+                <table class="w-full text-left text-[11px]" id="monthly-table">
+                    <!-- Table injected via JS -->
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Habit Modal -->
+    <div id="habitModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex justify-center items-center transition-all duration-300 opacity-0">
+        <div class="bg-dark-900 border border-dark-700 p-8 rounded-2xl w-full max-w-sm shadow-[0_0_80px_rgba(0,0,0,1)] transform scale-95 transition-transform duration-300 relative overflow-hidden" id="habitModalContent">
+            <!-- Top Decoration -->
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent-primary to-accent-secondary"></div>
+            
+            <h3 class="text-xl font-black mb-6 text-white tracking-tight">Add New Habit</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-dark-400 mb-2">Habit Name</label>
+                    <input type="text" id="newHabitName" class="w-full p-3.5 rounded-xl text-sm bg-dark-950 border border-dark-800 focus:border-accent-primary focus:shadow-glow transition-all text-white" placeholder="e.g., Read for 30 mins...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-dark-400 mb-2">Monthly Goal (Days)</label>
+                    <input type="number" id="newHabitGoal" class="w-full p-3.5 rounded-xl text-sm number-font bg-dark-950 border border-dark-800 focus:border-accent-primary focus:shadow-glow transition-all text-white" value="30" min="1" max="31">
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="closeAddHabitModal()" class="px-5 py-2.5 bg-dark-800 hover:bg-dark-700 text-dark-100 font-bold rounded-xl text-xs transition-colors border border-dark-700">Cancel</button>
+                <button onclick="saveNewHabit()" class="px-6 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-bold rounded-xl text-xs shadow-glow hover:scale-105 transition-all">Save Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- STREAMING_CHUNK:Variables and Calendar Logic Initialization... ---
+        
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+        
+        // English Days, starting from Saturday to Friday as requested
+        const FIXED_DAY_NAMES = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        // JS Date.getDay(): Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6
+        const FIXED_JS_DAYS = [6, 0, 1, 2, 3, 4, 5]; 
+        
+        // Standard JS day names for the monthly table header
+        const JS_DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        let daysInMonth = 30;
+        let weeksInMonth = []; 
+        let currentDisplayWeekIndex = 0;
+
+        let habits = [];
+        let state = []; // state[habitIndex][dayIndex] = boolean
+
+        let chartOverall = null;
+        let chartMonthlyBar = null;
+        let chartWeeklyDonuts = []; // 7 charts
+
+        // --- STREAMING_CHUNK:App Initialization and Time Math... ---
+
+        function initApp() {
+            const yearSelect = document.getElementById('year-select');
+            yearSelect.innerHTML = '';
+            for(let y = currentYear - 2; y <= currentYear + 3; y++) {
+                yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+            }
+            yearSelect.value = currentYear;
+            document.getElementById('month-select').value = currentMonth;
+
+            loadData();
+            calculateMonthData();
+            rebuildUI();
+        }
+
+        function calculateMonthData() {
+            daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            document.getElementById('month-days-count').innerText = `${daysInMonth} Days`;
+            
+            // Split month into weeks starting from SATURDAY (JS Day 6)
+            weeksInMonth = [];
+            let currentWeek = [];
+            
+            for (let i = 0; i < daysInMonth; i++) {
+                const date = new Date(currentYear, currentMonth, i + 1);
+                const jsDay = date.getDay(); // 0-6 (Sun-Sat)
+                
+                // If it's Saturday (6) and currentWeek has items, push and start new
+                if (jsDay === 6 && currentWeek.length > 0) {
+                    weeksInMonth.push(currentWeek);
+                    currentWeek = [];
+                }
+                
+                currentWeek.push({ 
+                    dayIndex: i, // 0 to 29/30
+                    jsDay: jsDay,
+                    dateNum: i + 1
+                });
+            }
+            if (currentWeek.length > 0) {
+                weeksInMonth.push(currentWeek);
+            }
+            
+            // Auto-select current week if in the current month/year
+            const today = new Date();
+            if(today.getFullYear() === currentYear && today.getMonth() === currentMonth) {
+                let currentDayIndex = today.getDate() - 1;
+                currentDisplayWeekIndex = weeksInMonth.findIndex(week => week.some(d => d.dayIndex === currentDayIndex));
+                if(currentDisplayWeekIndex === -1) currentDisplayWeekIndex = 0;
+            } else {
+                currentDisplayWeekIndex = 0;
+            }
+
+            ensureStateIntegrity();
+        }
+
+        function handleDateChange() {
+            currentYear = parseInt(document.getElementById('year-select').value);
+            currentMonth = parseInt(document.getElementById('month-select').value);
+            loadData();
+            calculateMonthData();
+            rebuildUI();
+        }
+
+        function nextWeek() {
+            if(currentDisplayWeekIndex < weeksInMonth.length - 1) {
+                currentDisplayWeekIndex++;
+                renderWeeklyGrid();
+                updateCharts();
+            }
+        }
+
+        function prevWeek() {
+            if(currentDisplayWeekIndex > 0) {
+                currentDisplayWeekIndex--;
+                renderWeeklyGrid();
+                updateCharts();
+            }
+        }
+
+        // --- STREAMING_CHUNK:Local Storage Management... ---
+
+        function getStorageKey() { return `habit_pro_${currentYear}_${currentMonth}`; }
+
+        function loadData() {
+            const habitsData = localStorage.getItem('habit_pro_list');
+            if(habitsData) {
+                habits = JSON.parse(habitsData);
+            } else {
+                // Default Premium Data
+                habits = [
+                    { id: '1', name: 'Morning Workout (30m)', goal: 20 },
+                    { id: '2', name: 'Read 20 Pages', goal: 25 },
+                    { id: '3', name: 'Meditation & Focus', goal: 15 },
+                    { id: '4', name: 'Code / Learn Skill', goal: 20 }
+                ];
+                saveHabits();
+            }
+
+            const monthState = localStorage.getItem(getStorageKey());
+            state = monthState ? JSON.parse(monthState) : [];
+        }
+
+        function ensureStateIntegrity() {
+            let stateChanged = false;
+            if(state.length !== habits.length) {
+                state = habits.map((h, i) => state[i] ? state[i] : new Array(daysInMonth).fill(false));
+                stateChanged = true;
+            }
+            for(let i=0; i<state.length; i++) {
+                if(state[i].length !== daysInMonth) {
+                    const newState = new Array(daysInMonth).fill(false);
+                    for(let j=0; j<Math.min(state[i].length, daysInMonth); j++) newState[j] = state[i][j];
+                    state[i] = newState;
+                    stateChanged = true;
+                }
+            }
+            if(stateChanged) saveState();
+        }
+
+        function saveState() { localStorage.setItem(getStorageKey(), JSON.stringify(state)); }
+        function saveHabits() { localStorage.setItem('habit_pro_list', JSON.stringify(habits)); }
+
+        function toggleHabit(habitIndex, dayIndex) {
+            state[habitIndex][dayIndex] = !state[habitIndex][dayIndex];
+            saveState();
+            
+            // Sync UI inputs instantly
+            const weeklyCheckbox = document.getElementById(`w-check-${habitIndex}-${dayIndex}`);
+            const monthlyCheckbox = document.getElementById(`m-check-${habitIndex}-${dayIndex}`);
+            
+            if(weeklyCheckbox) weeklyCheckbox.checked = state[habitIndex][dayIndex];
+            if(monthlyCheckbox) monthlyCheckbox.checked = state[habitIndex][dayIndex];
+
+            updateStatsRow(habitIndex);
+            updateCharts();
+        }
+
+        // --- STREAMING_CHUNK:Chart.js Premium Setup... ---
+
+        function initCharts() {
+            Chart.defaults.color = '#a1a1aa'; // zinc-400
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            // Create Gradients for Overall Donut
+            const ctxOverall = document.getElementById('overallDonutChart').getContext('2d');
+            const gradientPrimary = ctxOverall.createLinearGradient(0, 0, 0, 150);
+            gradientPrimary.addColorStop(0, '#6366f1'); // Indigo
+            gradientPrimary.addColorStop(1, '#22d3ee'); // Cyan
+
+            if(chartOverall) chartOverall.destroy();
+            chartOverall = new Chart(ctxOverall, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 100],
+                        backgroundColor: [gradientPrimary, '#18181b'], // Gradient and dark track
+                        borderWidth: 0,
+                        cutout: '80%', // Thinner ring for premium look
+                        borderRadius: 20 // Rounded ends
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } },
+                    animation: { duration: 1000, easing: 'easeOutQuart' }
+                }
+            });
+
+            // Create Gradients for Bar Chart
+            const ctxBar = document.getElementById('monthlyBarChart').getContext('2d');
+            const gradientBar = ctxBar.createLinearGradient(0, 0, 0, 140);
+            gradientBar.addColorStop(0, '#6366f1');
+            gradientBar.addColorStop(1, 'rgba(34, 211, 238, 0.2)');
+
+            if(chartMonthlyBar) chartMonthlyBar.destroy();
+            chartMonthlyBar = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: daysInMonth}, (_, i) => i + 1),
+                    datasets: [{
+                        data: Array(daysInMonth).fill(0),
+                        backgroundColor: gradientBar,
+                        borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                        barPercentage: 0.7, // Slightly wider bars but with spacing
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            backgroundColor: 'rgba(9, 9, 11, 0.95)', 
+                            titleColor: '#fff', 
+                            bodyColor: '#22d3ee', 
+                            borderColor: '#27272a', 
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: (items) => `Day ${items[0].label}`,
+                                label: (item) => `${item.raw} Habits Completed`
+                            }
+                        } 
+                    },
+                    scales: {
+                        y: { 
+                            display: true, 
+                            max: habits.length > 0 ? habits.length : 1,
+                            grid: { color: '#27272a', drawBorder: false }, // Faint horizontal grid lines
+                            ticks: { display: false, stepSize: 1 } // Hide Y labels but keep grid
+                        },
+                        x: { 
+                            grid: { display: false, drawBorder: false }, 
+                            ticks: { font: { size: 9, family: 'JetBrains Mono' }, color: '#71717a', maxRotation: 0 } 
+                        }
+                    },
+                    animation: { duration: 800, easing: 'easeOutQuart' }
+                }
+            });
+        }
+
+        function createWeeklyDonut(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 60);
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(1, '#22d3ee');
+
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 1],
+                        backgroundColor: [gradient, '#18181b'],
+                        borderWidth: 0,
+                        cutout: '80%',
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } },
+                    animation: { duration: 600, easing: 'easeOutQuart' }
+                }
+            });
+        }
+
+        // --- STREAMING_CHUNK:Chart Update Logic (Fixing >100% bug)... ---
+
+        function updateCharts() {
+            if(!habits.length) return;
+
+            let absoluteGoal = 0; // The true mathematical goal sum
+            let validCompletedForGoal = 0; // Completed capped at individual goal
+            let rawTotalCompleted = 0; // Total physical checks
+            let dailyCompletions = new Array(daysInMonth).fill(0);
+
+            for(let h = 0; h < habits.length; h++) {
+                const habitGoal = parseInt(habits[h].goal);
+                absoluteGoal += habitGoal;
+                
+                let habitCompletionsCount = 0;
+                for(let d = 0; d < daysInMonth; d++) {
+                    if(state[h][d]) {
+                        rawTotalCompleted++;
+                        habitCompletionsCount++;
+                        dailyCompletions[d]++;
+                    }
+                }
+                // Fix: Cap the contribution of this habit to the overall completion percentage
+                validCompletedForGoal += Math.min(habitCompletionsCount, habitGoal);
+            }
+
+            // OVERALL PERCENTAGE CALCULATION (Capped at 100%)
+            const overallPct = absoluteGoal > 0 ? Math.round((validCompletedForGoal / absoluteGoal) * 100) : 0;
+            const finalPct = Math.min(100, overallPct); // Failsafe
+
+            document.getElementById('overall-percentage').innerText = `${finalPct}%`;
+            // Show raw physical checks in the subtext
+            document.getElementById('overall-fraction').innerText = `${rawTotalCompleted} / ${absoluteGoal}`;
+            
+            if(chartOverall) {
+                chartOverall.data.datasets[0].data = [finalPct, Math.max(0, 100 - finalPct)];
+                chartOverall.update();
+            }
+
+            // Update Bar Chart
+            if(chartMonthlyBar) {
+                chartMonthlyBar.data.labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+                chartMonthlyBar.data.datasets[0].data = dailyCompletions;
+                chartMonthlyBar.options.scales.y.max = habits.length;
+                chartMonthlyBar.update();
+            }
+
+            // Update Top Habits dynamically
+            updateTopHabits();
+
+            // Update Weekly Mini-Donuts
+            const currentWeekData = weeksInMonth[currentDisplayWeekIndex];
+            const totalHabitsCount = habits.length;
+            
+            if(currentWeekData) {
+                for(let col = 0; col < 7; col++) {
+                    const expectedJsDay = FIXED_JS_DAYS[col];
+                    const dayInfo = currentWeekData.find(d => d.jsDay === expectedJsDay);
+                    
+                    const chart = chartWeeklyDonuts[col];
+                    const pctEl = document.getElementById(`w-pct-${col}`);
+                    
+                    if(chart && pctEl) {
+                        if(dayInfo) {
+                            const completedToday = dailyCompletions[dayInfo.dayIndex];
+                            chart.data.datasets[0].data = [completedToday, totalHabitsCount - completedToday];
+                            chart.data.datasets[0].backgroundColor[1] = '#18181b'; // normal background
+                            pctEl.innerText = totalHabitsCount > 0 ? Math.round((completedToday/totalHabitsCount)*100) + '%' : '0%';
+                        } else {
+                            // Blank day (outside month bounds)
+                            chart.data.datasets[0].data = [0, 1];
+                            chart.data.datasets[0].backgroundColor = ['transparent', 'transparent']; 
+                            pctEl.innerText = '-';
+                        }
+                        chart.update();
+                    }
+                }
+            }
+        }
+
+        // --- STREAMING_CHUNK:Building the LTR Weekly Grid... ---
+
+        function renderWeeklyGrid() {
+            const grid = document.getElementById('weekly-grid');
+            const currentWeekData = weeksInMonth[currentDisplayWeekIndex];
+            
+            if(!currentWeekData) return;
+
+            const firstDay = currentWeekData[0].dateNum;
+            const lastDay = currentWeekData[currentWeekData.length - 1].dateNum;
+            
+            let weekSuffix = ['th', 'st', 'nd', 'rd'][(currentDisplayWeekIndex + 1) % 10 > 3 ? 0 : (currentDisplayWeekIndex + 1) % 10];
+            if ((currentDisplayWeekIndex + 1) % 100 >= 11 && (currentDisplayWeekIndex + 1) % 100 <= 13) weekSuffix = 'th';
+            
+            document.getElementById('current-week-label').innerText = `Week ${currentDisplayWeekIndex + 1} (${firstDay} - ${lastDay} ${MONTH_NAMES[currentMonth]})`;
+
+            chartWeeklyDonuts.forEach(c => { if(c) c.destroy(); });
+            chartWeeklyDonuts = new Array(7).fill(null);
+            
+            let html = '';
+            
+            // Left to Right rendering (Sat -> Fri)
+            for(let col = 0; col < 7; col++) {
+                const targetJsDay = FIXED_JS_DAYS[col];
+                const dayName = FIXED_DAY_NAMES[col];
+                
+                const dayInfo = currentWeekData.find(d => d.jsDay === targetJsDay);
+                const isValidDay = !!dayInfo;
+                const dayIndex = isValidDay ? dayInfo.dayIndex : -1;
+                const dateLabel = isValidDay ? `${dayInfo.dateNum}/${currentMonth + 1}` : '--/--';
+                
+                // Visual dims for invalid days
+                const opacityClass = isValidDay ? 'opacity-100' : 'opacity-20 pointer-events-none grayscale';
+                const isWeekend = (targetJsDay === 0 || targetJsDay === 6); // Sun or Sat
+                const headerBg = isValidDay ? (isWeekend ? 'bg-indigo-900/20 text-indigo-400' : 'bg-dark-900 text-dark-300') : 'bg-dark-950 text-dark-700';
+
+                html += `
+                <div class="bg-dark-900/50 border border-dark-800 rounded-[1.25rem] flex flex-col h-[380px] shadow-sm overflow-hidden ${opacityClass} transition-opacity">
+                    <!-- Header -->
+                    <div class="${headerBg} py-2.5 text-center border-b border-dark-800 relative">
+                        <div class="text-[11px] font-bold tracking-widest uppercase">${dayName}</div>
+                        <div class="text-[9px] opacity-70 number-font mt-0.5">${dateLabel}</div>
+                        ${targetJsDay === new Date().getDay() && isValidDay && currentMonth === new Date().getMonth() && currentYear === new Date().getFullYear() ? '<div class="absolute top-0 left-0 w-full h-1 bg-accent-primary shadow-glow"></div>' : ''}
+                    </div>
+                    
+                    <!-- Donut Chart Area -->
+                    <div class="py-5 flex justify-center relative border-b border-dark-800/50 bg-dark-950/30">
+                        <div class="w-16 h-16 relative drop-shadow-lg">
+                            <canvas id="weekly-chart-${col}"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center mt-0.5">
+                                <span id="w-pct-${col}" class="text-[11px] font-bold number-font text-white">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tasks List -->
+                    <div class="flex-grow overflow-y-auto p-3 space-y-3 custom-scrollbar">`;
+                
+                if(isValidDay && habits.length > 0) {
+                    habits.forEach((habit, hIdx) => {
+                        const isChecked = state[hIdx][dayIndex] ? 'checked' : '';
+                        html += `
+                        <div class="flex items-center gap-3 group">
+                            <input type="checkbox" id="w-check-${hIdx}-${dayIndex}" class="habit-check flex-shrink-0" ${isChecked} onchange="toggleHabit(${hIdx}, ${dayIndex})">
+                            <span class="text-[10px] text-dark-400 group-hover:text-dark-100 transition-colors leading-tight truncate font-semibold" title="${habit.name}">${habit.name}</span>
+                        </div>`;
+                    });
+                } else if (!isValidDay) {
+                     html += `<div class="text-center text-dark-700 text-[9px] mt-10 font-bold uppercase tracking-[0.2em]">N/A</div>`;
+                }
+                
+                html += `
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML = html;
+
+            for(let col = 0; col < 7; col++) {
+                chartWeeklyDonuts[col] = createWeeklyDonut(`weekly-chart-${col}`);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Building the Comprehensive LTR Table... ---
+
+        function renderMonthlyTable() {
+            const table = document.getElementById('monthly-table');
+            let html = '';
+
+            // LTR Header
+            html += `<thead class="bg-dark-950/80 backdrop-blur-md sticky top-0 z-20 shadow-md">
+                <tr>
+                    <th rowspan="2" class="p-4 w-56 text-left font-bold border-b border-dark-800 text-dark-100 sticky left-0 bg-dark-950/90 z-30 shadow-[1px_0_0_0_#27272a] uppercase tracking-wider text-[10px]">Habits</th>`;
+            
+            // Days Row
+            for(let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(currentYear, currentMonth, i);
+                const jsDay = date.getDay();
+                const isWeekend = (jsDay === 0 || jsDay === 6); // Sun or Sat
+                const bgClass = isWeekend ? 'bg-indigo-900/10 text-accent-primary' : 'text-dark-400';
+                
+                html += `<th class="p-1.5 min-w-[32px] text-center border-b border-dark-800 number-font text-xs font-bold ${bgClass}">${i}</th>`;
+            }
+            
+            html += `
+                    <th rowspan="2" class="p-2 w-20 border-b border-dark-800 text-dark-400 font-bold text-[9px] uppercase tracking-widest text-center border-l border-dark-800">Done</th>
+                    <th rowspan="2" class="p-2 w-32 border-b border-dark-800 text-dark-400 font-bold text-[9px] uppercase tracking-widest text-center">Progress</th>
+                </tr>
+                <tr>`;
+            
+            // Day Names Row
+            for(let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(currentYear, currentMonth, i);
+                const jsDay = date.getDay();
+                const dayName = JS_DAY_NAMES[jsDay];
+                const isWeekend = (jsDay === 0 || jsDay === 6);
+                const bgClass = isWeekend ? 'bg-indigo-900/10 text-indigo-400' : 'text-dark-600';
+                
+                // First letter
+                const initial = dayName.charAt(0);
+                
+                html += `<th class="p-0.5 text-[10px] font-semibold border-b border-dark-800 text-center ${bgClass}">${initial}</th>`;
+            }
+            html += `</tr></thead><tbody class="divide-y divide-dark-800/50">`;
+
+            // Habit Rows
+            habits.forEach((habit, hIdx) => {
+                html += `<tr class="hover:bg-dark-800/30 transition-colors group">
+                    <td class="p-3 pl-4 text-left text-xs sticky left-0 bg-dark-900/80 backdrop-blur-sm group-hover:bg-dark-800/90 z-10 shadow-[1px_0_0_0_#27272a] flex justify-between items-center transition-colors">
+                        <span class="truncate pr-2 text-dark-100 font-semibold tracking-wide">${habit.name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="number-font text-[9px] text-dark-400 bg-dark-950 px-2 py-0.5 rounded border border-dark-800" title="Monthly Goal">${habit.goal}</span>
+                            <button onclick="deleteHabit(${hIdx})" class="text-dark-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 focus:outline-none">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </td>`;
+                
+                for(let d = 0; d < daysInMonth; d++) {
+                    const date = new Date(currentYear, currentMonth, d + 1);
+                    const jsDay = date.getDay();
+                    const isWeekend = (jsDay === 0 || jsDay === 6);
+                    const bgClass = isWeekend ? 'bg-indigo-950/10' : '';
+                    
+                    const isChecked = state[hIdx][d] ? 'checked' : '';
+                    html += `<td class="p-1 text-center border-l border-dark-800/50 ${bgClass}">
+                        <input type="checkbox" id="m-check-${hIdx}-${d}" class="habit-check mx-auto w-[18px] h-[18px] rounded-[4px]" ${isChecked} onchange="toggleHabit(${hIdx}, ${d})">
+                    </td>`;
+                }
+
+                html += `
+                    <td class="p-2 text-center border-l border-dark-800">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="number-font font-bold text-white text-xs" id="stat-m-comp-${hIdx}">0</span>
+                            <span class="text-[8px] text-dark-500 uppercase font-semibold">of ${habit.goal}</span>
+                        </div>
+                    </td>
+                    <td class="p-2 px-4 border-l border-dark-800/50">
+                        <div class="flex items-center gap-3 w-full">
+                            <div class="flex-grow h-1.5 bg-dark-950 rounded-full overflow-hidden border border-dark-800/50 shadow-inner">
+                                <div id="stat-m-bar-${hIdx}" class="h-full progress-bar-gradient transition-all duration-700 ease-out" style="width:0%"></div>
+                            </div>
+                            <span class="number-font font-bold text-[10px] text-accent-secondary w-8 text-right" id="stat-m-pct-${hIdx}">0%</span>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            
+            if(habits.length === 0) {
+                html += `<tr><td colspan="${daysInMonth + 3}" class="p-12 text-center text-dark-600 font-bold uppercase tracking-[0.2em] text-xs">No habits found. Start by adding one above.</td></tr>`;
+            }
+            
+            html += `</tbody>`;
+            table.innerHTML = html;
+
+            habits.forEach((_, hIdx) => updateStatsRow(hIdx));
+        }
+
+        function updateStatsRow(habitIndex) {
+            const goal = parseInt(habits[habitIndex].goal);
+            let completed = 0;
+            for(let d = 0; d < daysInMonth; d++) {
+                if(state[habitIndex][d]) completed++;
+            }
+            
+            // Capped at 100% for the row bar
+            const pct = goal > 0 ? Math.min(100, Math.round((completed / goal) * 100)) : 0;
+
+            const elComp = document.getElementById(`stat-m-comp-${habitIndex}`);
+            const elPct = document.getElementById(`stat-m-pct-${habitIndex}`);
+            const elBar = document.getElementById(`stat-m-bar-${habitIndex}`);
+
+            if(elComp) elComp.innerText = completed;
+            if(elPct) elPct.innerText = `${pct}%`;
+            if(elBar) elBar.style.width = `${pct}%`;
+        }
+
+        // --- STREAMING_CHUNK:Calculate and Render Top Habits... ---
+        
+        function updateTopHabits() {
+            const container = document.getElementById('top-habits-list');
+            if(!container) return;
+            
+            if(habits.length === 0) {
+                container.innerHTML = '<div class="text-[10px] text-dark-600 font-bold uppercase tracking-[0.2em] text-center mt-12">No habits added yet.</div>';
+                return;
+            }
+
+            // Calculate stats for top habits
+            let habitStats = habits.map((habit, index) => {
+                let completed = 0;
+                for(let d = 0; d < daysInMonth; d++) {
+                    if(state[index][d]) completed++;
+                }
+                const goal = parseInt(habit.goal) || 1;
+                const cappedCompleted = Math.min(completed, goal);
+                const percentage = Math.round((cappedCompleted / goal) * 100);
+                return { name: habit.name, percentage: percentage };
+            });
+
+            // Sort descending by percentage
+            habitStats.sort((a, b) => b.percentage - a.percentage);
+
+            let html = '';
+            // Display top 4 habits
+            habitStats.slice(0, 4).forEach((habit, idx) => {
+                const isTop = idx === 0;
+                const colorClass = isTop ? 'text-accent-secondary' : 'text-dark-100';
+                const barColor = isTop ? 'progress-bar-gradient' : 'bg-dark-700';
+                
+                html += `
+                <div class="bg-dark-900/50 border border-dark-800 p-3.5 rounded-xl hover:border-dark-700 transition-colors flex flex-col gap-2.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold ${colorClass} truncate pr-2">${habit.name}</span>
+                        <span class="text-[10px] font-black number-font text-white bg-dark-950 px-2 py-1 rounded-md border border-dark-800 shadow-inner">${habit.percentage}%</span>
+                    </div>
+                    <div class="w-full bg-dark-950 h-1.5 rounded-full overflow-hidden shadow-inner border border-dark-800/50">
+                        <div class="${barColor} h-full rounded-full transition-all duration-700 ease-out" style="width: ${habit.percentage}%"></div>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // --- STREAMING_CHUNK:Modals and Actions... ---
+        
+        function rebuildUI() {
+            initCharts();
+            renderWeeklyGrid();
+            renderMonthlyTable();
+            updateCharts();
+        }
+
+        function openAddHabitModal() {
+            document.getElementById('newHabitName').value = '';
+            document.getElementById('newHabitGoal').value = daysInMonth;
+            document.getElementById('newHabitGoal').max = daysInMonth;
+            
+            const modal = document.getElementById('habitModal');
+            const content = document.getElementById('habitModalContent');
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeAddHabitModal() {
+            const modal = document.getElementById('habitModal');
+            const content = document.getElementById('habitModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function saveNewHabit() {
+            const name = document.getElementById('newHabitName').value.trim();
+            const goal = parseInt(document.getElementById('newHabitGoal').value);
+            
+            if(!name) {
+                alert('Please enter a habit name.');
+                return;
+            }
+            if(isNaN(goal) || goal < 1) {
+                alert('Please enter a valid goal.');
+                return;
+            }
+
+            habits.push({ id: Date.now().toString(), name, goal });
+            state.push(new Array(daysInMonth).fill(false));
+            
+            saveHabits();
+            saveState();
+            closeAddHabitModal();
+            rebuildUI();
+        }
+
+        function deleteHabit(index) {
+            if(confirm('Warning: This will delete the habit and all its history. Are you sure?')) {
+                habits.splice(index, 1);
+                state.splice(index, 1);
+                saveHabits();
+                saveState();
+                rebuildUI();
+            }
+        }
+
+        function clearCurrentMonth() {
+            if(confirm('Warning: This will clear all checked boxes for this month. Are you sure?')) {
+                state = habits.map(() => new Array(daysInMonth).fill(false));
+                saveState();
+                rebuildUI();
+            }
+        }
+
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
